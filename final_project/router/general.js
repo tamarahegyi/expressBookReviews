@@ -3,6 +3,7 @@ let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
+const axios = require("axios")
 
 public_users.post("/register", (req, res) => {
   const { username, password } = req.body; // Extract username and password from request body
@@ -21,11 +22,37 @@ public_users.post("/register", (req, res) => {
 });
 
 // Get the book list available in the shop
-public_users.get("/", (req, res) => {
+/*public_users.get("/", (req, res) => {
   // Convert books array to a formatted JSON string with indentation
   const formattedBooks = JSON.stringify(books, null, 4); // 4 spaces for indentation
   res.send(formattedBooks);
+});*/
+
+// Get the book list available in the shop with async function
+public_users.get("/books-async", async (req, res) => {
+  try {
+    // Simulate async operation, here you just return the books directly
+    const getBooks = async () => {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (books) {
+            resolve(books); // Resolve with the books data
+          } else {
+            reject("No books found"); // Reject if something goes wrong
+          }
+        }, 100); // Simulated delay of 100ms
+      });
+    };
+
+    // Wait for the promise to resolve
+    const booksData = await getBooks();
+    res.json(booksData); // Send the books data as the response
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving book list", error: error.message });
+  }
 });
+
+
 
 // Get book details based on ISBN
 public_users.get("/isbn/:isbn", (req, res) => {
