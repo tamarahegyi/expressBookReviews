@@ -5,8 +5,19 @@ let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
 public_users.post("/register", (req, res) => {
-  //Write your code here
-  return res.status(300).json({ message: "Yet to be implemented upp" });
+  const { username, password } = req.body; // Extract username and password from request body
+  // Check if both username and password are provided
+  if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required" });
+  }
+  // Check if the username already exists
+  const userExists = users.some(users => users.username === username);
+  if (userExists) {
+      return res.status(409).json({ message: "Username already exists" });
+  }
+  // Register the new user
+  users.push({ username, password });
+  return res.status(201).json({ message: "User successfully registered. Now you can log in." });
 });
 
 // Get the book list available in the shop
@@ -21,7 +32,7 @@ public_users.get("/isbn/:isbn", (req, res) => {
   const isbn = req.params.isbn;
 
   // Find the book with the given ISBN
-  const filteredBooks = books.filter((b) => b.isbn === isbn);
+  const filteredBooks = books.filter((number) => number.isbn === isbn);
 
   if (filteredBooks.length > 0) {
     // Book found, send book details as JSON
